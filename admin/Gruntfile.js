@@ -126,6 +126,12 @@ module.exports = function (grunt) {
                     }
                 ]
             }
+        },
+        jshint: {
+            options: {
+                jshintrc: '.jshintrc'
+            },
+            alljs: ['<%= sources_path.front_end %>/js/portfolio.js','<%= sources_path.front_end %>/js/tz_portfolio.js']
         }
     });
     grunt.loadNpmTasks('grunt-contrib-cssmin');
@@ -133,10 +139,12 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-csscomb');
     grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-contrib-jshint');
 
     // Default task(s).
     grunt.registerTask('back_end', ['uglify:back_end','uglify:back_end_expression_js',
         'cssmin:back_end','cssmin:back_end_jui','copy:back_end']);
-    grunt.registerTask('front_end', ['uglify:front_end','uglify:front_end','copy:front_end','less','cssmin:front_end']);
+    grunt.registerTask('front_end', 'jshint',
+        ['uglify:front_end','uglify:front_end','copy:front_end','less','cssmin:front_end']);
     grunt.registerTask('default', ['back_end','front_end']);
 };
