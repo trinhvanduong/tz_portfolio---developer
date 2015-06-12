@@ -202,6 +202,7 @@ function ajaxComments($element, itemid, text, link) {
                 $container.find('.element').css({opacity: 0});
             }
             $container.imagesLoaded(function(){
+                $var.afterImagesLoaded();
                 if(bool) {
                     $container.find('.element').css({opacity: 1});
                 }
@@ -222,6 +223,7 @@ function ajaxComments($element, itemid, text, link) {
                             window.tzSortFilter($('#filter').find('a'), $('#filter'), $params.filter_tags_categories_order);
                         }
                     }
+                    $isotope_options.complete();
                 });
             });
         };
@@ -369,7 +371,8 @@ function ajaxComments($element, itemid, text, link) {
         },
         // Call back function
         beforeCalculateColumn   : function(){},
-        afterCalculateColumn    : function(){}
+        afterCalculateColumn    : function(){},
+        afterImagesLoaded       : function(){}
     };
     $.fn.tzPortfolioIsotope = function(options){
         if (options === undefined) options = {};
