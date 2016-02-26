@@ -67,12 +67,13 @@ input.readonly,input.required{background:none}
 #layout_params .column:focus >.columntools{opacity:1}
 #layout_params .collapse.in{overflow: inherit;}
 
-#plazart_layout_builder select {
+
+#plazart_layout_builder .generator select {
     width: auto;
 }
 
 /*Popover*/
-#layout_params select{
+#layout_params .generator select{
     width: auto;
 }
 .popover{

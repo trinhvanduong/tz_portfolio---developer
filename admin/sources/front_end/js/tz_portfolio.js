@@ -122,13 +122,17 @@ function ajaxComments($element, itemid, text, link) {
         // This is the function to calculate column width for isotope
         $.tzPortfolioIsotope.tz_init = function(bool){
             var contentWidth    = $($var.mainElementSelector).width();
-            var columnWidth     = $var.columnWidth;
+            var columnWidth     = $params.tz_column_width;
             var curColCount     = 0;
 
             var maxColCount     = 0;
             var newColCount     = 0;
             var newColWidth     = 0;
             var featureColWidth = 0;
+
+            if($var.columnWidth){
+                columnWidth    = $var.columnWidth;
+            }
 
             if($var.timeline) {
                 $.extend(true, $.Isotope.prototype, {
@@ -196,6 +200,8 @@ function ajaxComments($element, itemid, text, link) {
             $($var.elementFeatureSelector).width(featureColWidth);
             $($this.selector + ' .element.TzDate').width(contentWidth);
 
+            $var.afterColumnWidth(newColCount,newColWidth);
+
             var $container = $($this.selector);
 
             if(bool) {
@@ -206,6 +212,15 @@ function ajaxComments($element, itemid, text, link) {
                 if(bool) {
                     $container.find('.element').css({opacity: 1});
                 }
+
+                if(!$isotope_options.core.layoutMode.length){
+                    $isotope_options.core.layoutMode  = 'masonry';
+                }else{
+                    if($params.layout_type.length){
+                        $isotope_options.core.layoutMode  = $params.layout_type[0];
+                    }
+                }
+
                 $container.isotope({
                     itemSelector : $isotope_options.core.itemSelector,
                     layoutMode: $isotope_options.core.layoutMode,
@@ -220,7 +235,8 @@ function ajaxComments($element, itemid, text, link) {
                     if(parseInt($params.tz_show_filter,10) && $params.filter_tags_categories_order) {
                         //Sort tags or categories filter
                         if(typeof window.tzSortFilter != 'undefined') {
-                            window.tzSortFilter($('#filter').find('a'), $('#filter'), $params.filter_tags_categories_order);
+                            window.tzSortFilter($($isotope_options.sortParentTag).find($isotope_options.sortChildTag),
+                                $($isotope_options.sortParentTag), $params.filter_tags_categories_order);
                         }
                     }
                     $isotope_options.complete();
@@ -301,27 +317,23 @@ function ajaxComments($element, itemid, text, link) {
         }
 
         // Call Function isotope ind document ready function
-        //$(document).ready(function(){
-
         $.tzPortfolioIsotope.tz_init(true);
         $($isotope_options.filterSelector+'[data-option-key=sortBy]').children().removeClass('selected')
             .end().find('[data-option-value='+$isotope_options.core.sortBy + ']').addClass('selected');
 
         $.tzPortfolioIsotope.loadPortfolio();
-        //});
 
         // Call Function tz_init in window load and resize function
-        var tz_resizeTimer = null;
-        $(window).bind('load resize', function() {
-            if (tz_resizeTimer) clearTimeout(tz_resizeTimer);
-            tz_resizeTimer = setTimeout($.tzPortfolioIsotope.tz_init(), 100);
+        $(window).smartresize(function(){
+            $.tzPortfolioIsotope.tz_init();
         });
+        $(window).smartresize();
 
         return this;
     };
     // Create options object
     $.tzPortfolioIsotope.defaults  = { // This is default options
-        'columnWidth'               : 233,
+        'columnWidth'               : '',
         'mainElementSelector'       : '#TzContent',
         'containerElementSelector'  : '#portfolio',
         //'elementSelector'           : '.element',
@@ -337,12 +349,14 @@ function ajaxComments($element, itemid, text, link) {
             'tz_filter_type'                : 'categories',
             'show_all_filter'               : 0,
             'tz_comment_type'               : 'disqus',
-            'tz_show_count_comment'         : 1
+            'tz_show_count_comment'         : 1,
+            'tz_column_width'               : 233,
+            'layout_type'                   : ['masonry']
         },
         'isotope_options'                   : {
             'core'  : {
                 'itemSelector': '.element',
-                'layoutMode': 'masonry',
+                'layoutMode': '',
                 'sortBy': 'date',
                 'sortAscending': false,
                 'filter': '*',
@@ -365,13 +379,16 @@ function ajaxComments($element, itemid, text, link) {
                     }
                 }
             },
-            'filterSelector': '#tz_options .option-set',
-            'tagFilter': 'a',
+            'filterSelector'    : '#tz_options .option-set',
+            'tagFilter'         : 'a',
+            'sortParentTag'     : '#filter',
+            'sortChildTag'      : '#filter',
             'complete'  : function(){}
         },
         // Call back function
         beforeCalculateColumn   : function(){},
         afterCalculateColumn    : function(){},
+        afterColumnWidth        : function(){},
         afterImagesLoaded       : function(){}
     };
     $.fn.tzPortfolioIsotope = function(options){
@@ -413,9 +430,10 @@ function ajaxComments($element, itemid, text, link) {
         var LastDate = $('div.TzDate:last').attr('data-category');
 
         $container.infinitescroll({
-                navSelector  : '#loadaj a',    // selector for the paged navigation
-                nextSelector : '#loadaj a:first',  // selector for the NEXT link (to page 2)
-                itemSelector : '.element',     // selector for all items you'll retrieve
+                navSelector  : $var.navSelector,    // selector for the paged navigation
+                nextSelector : $var.nextSelector,  // selector for the NEXT link (to page 2)
+                itemSelector : $var.itemSelector,     // selector for all items you'll retrieve
+                dataType     : $var.dataType,
                 errorCallback: function() {
                     if(!$var.errorCallback) {
                         if ($params.tz_portfolio_layout == 'ajaxButton') {
@@ -452,6 +470,8 @@ function ajaxComments($element, itemid, text, link) {
                     }
                 }
 
+                console.log($.tzInfiniteScroll.ajaxLoadComplete());
+
                 // ensure that images load before adding to masonry layout
                 $newElems.imagesLoaded(function() {
 
@@ -486,10 +506,14 @@ function ajaxComments($element, itemid, text, link) {
                     tzpage++;
 
                     if(parseInt($params.tz_show_filter,10)) {
+                        var $lang   = '';
+                        if($var.lang && $var.lang.length){
+                            $lang   = '&lang=' + $var.lang;
+                        }
                         if (!parseInt($params.show_all_filter,10)) {
                             if ($params.tz_filter_type == 'tags') {
                                 $.ajax({
-                                    url: 'index.php?option=com_tz_portfolio&task=portfolio.ajaxtags',
+                                    url: 'index.php?option=com_tz_portfolio&task=portfolio.ajaxtags' + $lang,
                                     data: {
                                         'tags': getTags(),
                                         'Itemid': $var.itemID,
@@ -504,16 +528,18 @@ function ajaxComments($element, itemid, text, link) {
                                         if ($params.filter_tags_categories_order) {
                                             //Sort tags or categories filter
                                             if(typeof window.tzSortFilter != 'undefined') {
-                                                window.tzSortFilter($('#filter').find('a'), $('#filter'), $params.filter_tags_categories_order);
+                                                window.tzSortFilter($($var.sortParentTag).find($var.sortChildTag), $($var.sortParentTag), $params.filter_tags_categories_order);
                                             }
                                         }
                                     }
+
+                                    $scroll = true;
                                 });
                             }
 
                             if ($params.tz_filter_type == 'categories') {
                                 $.ajax({
-                                    url: 'index.php?option=com_tz_portfolio&task=portfolio.ajaxcategories',
+                                    url: 'index.php?option=com_tz_portfolio&task=portfolio.ajaxcategories' + $lang,
                                     data: {
                                         'catIds': getCategories(),
                                         'Itemid': $var.itemID,
@@ -528,13 +554,17 @@ function ajaxComments($element, itemid, text, link) {
                                         if ($params.filter_tags_categories_order) {
                                             //Sort tags or categories filter
                                             if(typeof window.tzSortFilter != 'undefined') {
-                                                window.tzSortFilter($('#filter').find('a'), $('#filter'), $params.filter_tags_categories_order);
+                                                window.tzSortFilter($($var.sortParentTag).find($var.sortChildTag), $($var.sortParentTag), $params.filter_tags_categories_order);
                                             }
                                         }
                                     }
+
+                                    $scroll = true;
                                 });
                             }
                         }
+                    }else{
+                        $scroll = true;
                     }
 
                     //if there still more item
@@ -544,8 +574,6 @@ function ajaxComments($element, itemid, text, link) {
                         $('div#tz_append').find('a:first').show();
                     }
                 });
-
-                $scroll = true;
             }
         );
 
@@ -553,7 +581,7 @@ function ajaxComments($element, itemid, text, link) {
             $(window).scroll(function(){
                 $(window).unbind('.infscr');
                 if($scroll){
-                    if(($(window).scrollTop() + $(window).height()) >= ($(document).height() - 50)){
+                    if($(window).scrollTop() >= $container.height()){
                         $scroll	= false;
                         $container.infinitescroll('retrieve');
                     }
@@ -572,6 +600,25 @@ function ajaxComments($element, itemid, text, link) {
         }
     };
 
+    var tz = $.tzInfiniteScroll.ajaxLoadComplete = $.extend(true,function($element){
+        if(tz.data.length){
+            tz.data.each(function(fn, value){
+                if(typeof fn == 'function'){
+                    // Call function
+                    fn();
+                }
+            });
+        }
+    }, {
+        data: []
+    });
+
+    $.tzInfiniteScroll.addCompleteFunction  = function(fn){
+        if(fn && typeof fn){
+            tz.data.push(fn);
+        }
+    };
+
     // Create options object
     $.tzInfiniteScroll.defaults  = {
         rootPath        : '',
@@ -580,9 +627,13 @@ function ajaxComments($element, itemid, text, link) {
         navSelector     : '#loadaj a',    // selector for the paged navigation
         nextSelector    : '#loadaj a:first',  // selector for the NEXT link (to page 2)
         itemSelector    : '.element',     // selector for all items you'll retrieve
+        dataType        : 'html',
         itemID          : null,
         commentText     : 'Comment count:',
         timeline        : false,
+        sortParentTag   : '#filter',
+        sortChildTag    : 'a',
+        lang            : '',
         errorCallback   : null
 
     };
