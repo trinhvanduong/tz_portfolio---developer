@@ -73,50 +73,68 @@ function ajaxComments($element, itemid, text, link) {
     'use strict';
     $.tzPortfolioIsotope  = function(el,options){
         var $this   = $(el),
-            $var    = $.extend(true,$.tzPortfolioIsotope.defaults,options),
-            $params = $var.params,
+            $var    = $.extend(true,$.tzPortfolioIsotope.defaults,options);
+
+        if(!$var.params.orderby_sec.length){
+            $var.params.orderby_sec = 'rdate';
+        }
+
+        var $params = $var.params,
             $isotope_options    = $var.isotope_options;
 
-        switch($params.orderby_sec){
-            default:
-                $isotope_options.core.sortBy        = 'original-order';
-                $isotope_options.core.sortAscending = false;
-                break;
-            case 'date':
-                $isotope_options.core.sortBy        = 'date';
-                $isotope_options.core.sortAscending = true;
-                if($var.timeline){
+
+        if($var.isotope_options.core.sortBy != 'original-order'){
+            switch($params.orderby_sec){
+                default:
+                    $isotope_options.core.sortBy        = 'original-order';
                     $isotope_options.core.sortAscending = false;
-                }
-                break;
-            case 'rdate':
-                $isotope_options.core.sortBy        = 'date';
-                $isotope_options.core.sortAscending = false;
-                break;
-            case 'alpha':
-                $isotope_options.core.sortBy        = 'name';
-                $isotope_options.core.sortAscending = true;
-                break;
-            case 'ralpha':
-                $isotope_options.core.sortBy        = 'name';
-                $isotope_options.core.sortAscending = false;
-                break;
-            case 'author':
-                $isotope_options.core.sortBy = 'date';
-                $isotope_options.core.sortAscending = false;
-                break;
-            case 'rauthor':
-                $isotope_options.core.sortBy = 'date';
-                $isotope_options.core.sortAscending = false;
-                break;
-            case 'hits':
-                $isotope_options.core.sortBy        = 'hits';
-                $isotope_options.core.sortAscending = false;
-                break;
-            case 'rhits':
-                $isotope_options.core.sortBy        = 'hits';
-                $isotope_options.core.sortAscending = true;
-                break;
+                    break;
+                case 'date':
+                    $isotope_options.core.sortBy        = 'date';
+                    $isotope_options.core.sortAscending = true;
+                    if($var.timeline){
+                        $isotope_options.core.sortAscending = false;
+                    }
+                    break;
+                case 'rdate':
+                    $isotope_options.core.sortBy        = 'date';
+                    $isotope_options.core.sortAscending = false;
+                    break;
+                case 'alpha':
+                    $isotope_options.core.sortBy        = 'name';
+                    $isotope_options.core.sortAscending = true;
+                    break;
+                case 'ralpha':
+                    $isotope_options.core.sortBy        = 'name';
+                    $isotope_options.core.sortAscending = false;
+                    break;
+                case 'author':
+                    $isotope_options.core.sortBy = 'date';
+                    $isotope_options.core.sortAscending = false;
+                    break;
+                case 'rauthor':
+                    $isotope_options.core.sortBy = 'date';
+                    $isotope_options.core.sortAscending = false;
+                    break;
+                case 'hits':
+                    $isotope_options.core.sortBy        = 'hits';
+                    $isotope_options.core.sortAscending = false;
+                    break;
+                case 'rhits':
+                    $isotope_options.core.sortBy        = 'hits';
+                    $isotope_options.core.sortAscending = true;
+                    break;
+            }
+        }else{
+            $isotope_options.core.sortAscending = true;
+        }
+
+        if(!$isotope_options.core.layoutMode.length){
+            $isotope_options.core.layoutMode  = 'masonry';
+        }else{
+            if($params.layout_type.length){
+                $isotope_options.core.layoutMode  = $params.layout_type[0];
+            }
         }
 
         // This is the function to calculate column width for isotope
