@@ -20,6 +20,7 @@ Demo: http://demo.tzportfolio.com/
 
 *** Changelog ***
 
+<<<<<<< HEAD
 06/014/2016 - 3.3.5
 
 	- Fix error with plugin tz_portfolio in group content.
@@ -28,6 +29,8 @@ Demo: http://demo.tzportfolio.com/
 	- Fix error validate in view date.
 	- Fix error some languages in front-end.
 
+=======
+>>>>>>> origin/master
 03/05/2016 - 3.3.4
 
 	- Fix some errors in Template Styles of version 3.3.3.

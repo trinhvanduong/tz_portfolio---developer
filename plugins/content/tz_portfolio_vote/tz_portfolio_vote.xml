@@ -7,7 +7,11 @@
 	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
 	<authorEmail>support@templaza.com</authorEmail>
 	<authorUrl>www.templaza.com</authorUrl>
+<<<<<<< HEAD
 	<version>3.3.5</version>
+=======
+	<version>3.3.4</version>
+>>>>>>> origin/master
 	<description>PLG_TZ_PORTFOLIO_VOTE_XML_DESCRIPTION</description>
 	<install>
 		<sql>
